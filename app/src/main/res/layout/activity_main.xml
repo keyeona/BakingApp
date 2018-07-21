@@ -11,4 +11,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragmentContainer"></FrameLayout>
+
 </android.support.constraint.ConstraintLayout>

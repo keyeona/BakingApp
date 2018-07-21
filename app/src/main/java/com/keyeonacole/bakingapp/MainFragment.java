@@ -23,7 +23,6 @@ import com.google.gson.annotations.SerializedName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +43,10 @@ public class MainFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private String RECIPES_URL_STRING = null;
     private String NAME_VALUE_PAIRS = null;
-    public ArrayList<String> recipeList;
-    public ArrayList<String> recipeNames;
-
+    public List<String> MrecipeNames;
     public RecipeAdapter recipeAdb;
     private RequestQueue MQUEUE;
 
-
-    //Recipe
-    Recipe mRecipe;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -80,7 +74,6 @@ public class MainFragment extends Fragment {
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-
     }
 
     @Override
@@ -89,28 +82,17 @@ public class MainFragment extends Fragment {
         MQUEUE = Volley.newRequestQueue(getActivity().getApplicationContext());
         RECIPES_URL_STRING = getResources().getString(R.string.recipes_json_url);
         NAME_VALUE_PAIRS = getResources().getString(R.string.name_value_pairs);
-        ArrayList<Recipe> recipeList  = new ArrayList<Recipe>();
-        ArrayList<String> recipeNames  = new ArrayList<String>();
-
-        Recipe[] recipes = {};
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
+        MrecipeNames = new ArrayList<String>();
 
-
-        //TODO: Delete before submitting
-        //When you are on the ROAD
-        //Recipe recipe = new Gson().fromJson(String.valueOf(inputStream), Recipe.class);
         try {
             readUrl(RECIPES_URL_STRING);
-            //recipeAdb = new RecipeAdapter (getActivity(), 0, recipeList);
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, recipeNames);
-            listView.setAdapter(recipeAdb);
-
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
+            listView.setAdapter(listAdapter);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return rootView;
     }
 
@@ -155,41 +137,20 @@ public class MainFragment extends Fragment {
 
 
 
-    public class RecipeStepsList {
-        @SerializedName("id")
-        public List<RecipeSteps> recipeStepsList;
-    }
-    //TODO: Delete before submitting
-    //http://blog.nkdroidsolutions.com/json-parsing-from-assets-using-gson-in-android-tutorial/
-    public String loadJSONFromAsset() {
-        String json = null;
-        try {
-            InputStream is = getActivity().getAssets().open("json.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
-    }
-
     private void readUrl(String url) throws Exception{
         final JsonParser parser = new JsonParser();
         final  String nameValuePairs = getResources().getString(R.string.name_value_pairs);
         final String values = getResources().getString(R.string.values);
-        final ArrayList<String> recipeNames  = new ArrayList<String>();
+        MrecipeNames = new ArrayList<String>();
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+                MrecipeNames = new ArrayList<String>();
                 int length = response.length();
                 //iterateThrough(response.toString());
                 Log.i("Length", String.valueOf(response.length()));
-                for (int i = 0; i < length ; i++) {
+                for (int i = 0; i < length ; i++)
                     try {
                         //Response
                         Object responseObject = response.get(i);
@@ -198,53 +159,46 @@ public class MainFragment extends Fragment {
                         String recipeItems = parser.parse(jsonObject.get(nameValuePairs).toString()).toString();
                         //Recipe
                         Recipe recipe = new Gson().fromJson(recipeItems, Recipe.class);
-                        //recipeList.add(recipe);
-                        recipeNames.add(recipe.getName());
-
-
+                        MrecipeNames.add(recipe.getName());
                         //Ingredients
                         JsonObject recipeIngredientsObg = recipe.getIngredients();
                         JsonArray recipeIngredients = recipeIngredientsObg.getAsJsonArray(values);
                         String recipeIngredientsStr = recipeIngredients.toString();
-                        for (int j = 0; j <  recipeIngredients.size(); j++) {
-                            iterateThrough(recipeIngredientsStr,i,j);
+                        for (int j = 0; j < recipeIngredients.size(); j++) {
+                            iterateThrough(recipeIngredientsStr, i, j);
                         }
                         //Steps
                         JsonObject recipeStepsObg = recipe.getSteps();
                         JsonArray recipeStepsAr = recipeStepsObg.getAsJsonArray(values);
                         String recipeStepsStr = recipeStepsAr.toString();
                         Log.i("Steps", recipeStepsObg.toString());
-                        for (int j = 0; j <  recipeStepsAr.size(); j++) {
-                            String sendToClass = iterateThrough(recipeStepsStr,i,j);
+                        for (int j = 0; j < recipeStepsAr.size(); j++) {
+                            String sendToClass = iterateThrough(recipeStepsStr, i, j);
                             RecipeSteps recipeStepsClass = new Gson().fromJson(sendToClass, RecipeSteps.class);
                             recipeStepsClass.setRecipeName(recipe.getName());
                             Log.i("ClassSteps", recipeStepsClass.getShortDesc());
                         }
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-                }
-
             }
         }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {}
 
         });
+        Log.i("ReadURL", String.valueOf(MrecipeNames));
         MQUEUE.add(jsonArrayRequest);
     }
 
     public  String iterateThrough(String parseMe, int recipeId, int position) {
         final JsonParser parser = new JsonParser();
         JsonArray primaryArray = parser.parse(parseMe).getAsJsonArray();
-
                 Object responseObject = primaryArray.get(position);
                 String responseData = new Gson().toJson(responseObject);
                 JsonObject jsonObject = parser.parse(responseData).getAsJsonObject();
                 String recipeItems = parser.parse(jsonObject.get(NAME_VALUE_PAIRS).toString()).toString();
                 Log.i("Test", recipeItems);
-                 return recipeItems;
+                return recipeItems;
         }
 }

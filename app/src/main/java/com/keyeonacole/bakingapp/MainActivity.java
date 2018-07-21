@@ -21,14 +21,14 @@ public class MainActivity extends FragmentActivity implements MainFragment.OnFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_main);
+        setContentView(R.layout.activity_main);
         MainFragment mainFragment = null;
         try {
             mainFragment = new MainFragment();
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .add(R.id.recipe_name_tv, mainFragment)
-            .commit();
+                    .add(R.id.fragmentContainer, mainFragment)
+                    .commit();
         } catch (IOException e) {
             e.printStackTrace();
         }
