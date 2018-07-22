@@ -3,10 +3,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.android.volley.Request;
@@ -19,7 +21,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.annotations.SerializedName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.io.IOException;
@@ -27,54 +28,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MainFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MainFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-
 public class MainFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private String RECIPES_URL_STRING = null;
     private String NAME_VALUE_PAIRS = null;
     public List<String> MrecipeNames;
     public RecipeAdapter recipeAdb;
     private RequestQueue MQUEUE;
-
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     public MainFragment() throws IOException {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MainFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1, String param2) throws IOException {
-        MainFragment fragment = new MainFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,7 +54,7 @@ public class MainFragment extends Fragment {
         MrecipeNames = new ArrayList<String>();
 
         try {
-            readUrl(RECIPES_URL_STRING);
+            readUrl(RECIPES_URL_STRING, inflater, rootView, listView);
             ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
             listView.setAdapter(listAdapter);
         } catch (Exception e) {
@@ -135,18 +102,15 @@ public class MainFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-
-
-    private void readUrl(String url) throws Exception{
+    private void readUrl(String url, final LayoutInflater inflater, final View rootView, final ListView listView) throws Exception{
         final JsonParser parser = new JsonParser();
         final  String nameValuePairs = getResources().getString(R.string.name_value_pairs);
         final String values = getResources().getString(R.string.values);
-        MrecipeNames = new ArrayList<String>();
+        final List<Recipe> listOfRecipes = new ArrayList<Recipe>();
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                MrecipeNames = new ArrayList<String>();
                 int length = response.length();
                 //iterateThrough(response.toString());
                 Log.i("Length", String.valueOf(response.length()));
@@ -157,9 +121,14 @@ public class MainFragment extends Fragment {
                         String responseData = new Gson().toJson(responseObject);
                         JsonObject jsonObject = parser.parse(responseData).getAsJsonObject();
                         String recipeItems = parser.parse(jsonObject.get(nameValuePairs).toString()).toString();
+
                         //Recipe
                         Recipe recipe = new Gson().fromJson(recipeItems, Recipe.class);
+                        listOfRecipes.add(recipe);
                         MrecipeNames.add(recipe.getName());
+                        Log.i("InsideForTry", String.valueOf(MrecipeNames));
+
+
                         //Ingredients
                         JsonObject recipeIngredientsObg = recipe.getIngredients();
                         JsonArray recipeIngredients = recipeIngredientsObg.getAsJsonArray(values);
@@ -172,23 +141,29 @@ public class MainFragment extends Fragment {
                         JsonArray recipeStepsAr = recipeStepsObg.getAsJsonArray(values);
                         String recipeStepsStr = recipeStepsAr.toString();
                         Log.i("Steps", recipeStepsObg.toString());
+
                         for (int j = 0; j < recipeStepsAr.size(); j++) {
                             String sendToClass = iterateThrough(recipeStepsStr, i, j);
                             RecipeSteps recipeStepsClass = new Gson().fromJson(sendToClass, RecipeSteps.class);
                             recipeStepsClass.setRecipeName(recipe.getName());
                             Log.i("ClassSteps", recipeStepsClass.getShortDesc());
                         }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView,listView);
+                Log.i("RecipeList", String.valueOf(listOfRecipes.size()));
+                Log.i("OutSideForTry", String.valueOf(MrecipeNames));
+
             }
         }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {}
 
         });
-        Log.i("ReadURL", String.valueOf(MrecipeNames));
         MQUEUE.add(jsonArrayRequest);
+
     }
 
     public  String iterateThrough(String parseMe, int recipeId, int position) {
@@ -201,4 +176,32 @@ public class MainFragment extends Fragment {
                 Log.i("Test", recipeItems);
                 return recipeItems;
         }
+
+
+
+    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView, ListView listView){
+        Log.i("populateui", String.valueOf(MrecipeNames));
+
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
+        listView.setAdapter(listAdapter);
+        //listView.setOnClickListener(new listView.getOnItemClickListener());
+        listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        DetailFragment detailFragment = null;
+                        Log.i("Position", String.valueOf(i));
+                        try {
+                            detailFragment = new DetailFragment();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.replace(R.id.fragmentContainer, detailFragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
+                    }
+        });
+
+    }
+
 }

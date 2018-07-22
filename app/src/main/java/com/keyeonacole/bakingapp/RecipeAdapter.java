@@ -61,8 +61,6 @@ public class RecipeAdapter extends ArrayAdapter<Recipe> {
                 holder = (ViewHolder) vi.getTag();
             }
 
-            //holder.display_name.setText(lProducts.get(position).name);
-            //holder.display_number.setText(lProducts.get(position).number);
 
 
         } catch (Exception e) {
