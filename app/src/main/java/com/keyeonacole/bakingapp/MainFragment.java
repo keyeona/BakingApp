@@ -64,9 +64,9 @@ public class MainFragment extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(int position ) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(position);
         }
     }
 
@@ -99,7 +99,8 @@ public class MainFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(int postions);
+
     }
 
     private void readUrl(String url, final LayoutInflater inflater, final View rootView, final ListView listView) throws Exception{
@@ -189,16 +190,17 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         DetailFragment detailFragment = null;
-                        Log.i("Position", String.valueOf(i));
-                        try {
-                            detailFragment = new DetailFragment();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction.replace(R.id.fragmentContainer, detailFragment);
-                        fragmentTransaction.addToBackStack(null);
-                        fragmentTransaction.commit();
+                        mListener.onFragmentInteraction(i);
+                        //Log.i("Position", String.valueOf(i));
+                        //try {
+                        //    detailFragment = new DetailFragment();
+                        //} catch (IOException e) {
+                        //    e.printStackTrace();
+                        //}
+                        //FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        //fragmentTransaction.replace(R.id.fragmentContainer, detailFragment);
+                        //fragmentTransaction.addToBackStack(null);
+                        //fragmentTransaction.commit();
                     }
         });
 
