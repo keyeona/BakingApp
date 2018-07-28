@@ -18,7 +18,6 @@ public class RecipeActivity extends AppCompatActivity {
         super.onStart();
         setContentView(R.layout.activity_main);
         DetailFragment detailFragment = null;
-        Toast.makeText(this,"onStart "  , Toast.LENGTH_SHORT).show();
 
         try {
             detailFragment = new DetailFragment();

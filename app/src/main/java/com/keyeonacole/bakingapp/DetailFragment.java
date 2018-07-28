@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     @BindView(R.id.recipe_image) ImageView imageView;
     @BindView(R.id.exoplayerview_activity_video) PlayerView videoPlayer;
     @BindView(R.id.recipe_step_full_description) TextView stepDescription;
+    @BindView(R.id.scrollView) ScrollView scrollView;
     private String RECIPES_URL_STRING = null;
     private String NAME_VALUE_PAIRS = null;
     private ExpandableListViewAdapter listViewAdapter;
@@ -67,6 +69,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     private HashMap<String,List<String>> ingredientHashMap = new HashMap<>();
     private List<RecipeSteps> recipeStepsList = new ArrayList<>();
     private List<String> stepsVideoList = new ArrayList<>();
+
 
     private RecyclerRecipeAdapter recylerAdapter;
 
@@ -182,11 +185,15 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
 
     @Override
     public void onItemClick(View view, int position) {
+
+        scrollView.setScrollY(0);
         Log.i("onClick", String.valueOf(position));
         RecipeSteps currentStep = recipeStepsList.get(position);
         Log.i("StepVideo", currentStep.getVideoURL());
         stepDescription.setText(currentStep.getFullDesc());
         stepDescription.setVisibility(View.VISIBLE);
+
+        if (stepsVideoList.get(position) != ""){
 
         //Prepare Track Selector for Video Player
         Handler mainHandler = new Handler();
@@ -198,7 +205,6 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
 
         SimpleExoPlayer player =
                 ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
-
         videoPlayer.setPlayer(player);
         videoPlayer.setVisibility(View.VISIBLE);
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
@@ -207,11 +213,26 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         Uri mp4VideoUri = Uri.parse(stepsVideoList.get(position));
         MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(mp4VideoUri);
-
         player.prepare(videoSource);
 
+        }
 
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        //Prepare Track Selector for Video Player
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        DefaultTrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        SimpleExoPlayer player =
+                ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+        player.release();
 
     }
 }
