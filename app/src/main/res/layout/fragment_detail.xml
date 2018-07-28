@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/recipe_image"
@@ -48,7 +49,7 @@
             app:layout_constraintTop_toBottomOf="@+id/recipe_Title_tv" />
 
         <TextView
-            android:id="@+id/ingredient_title"
+            android:id="@+id/steps_title"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
@@ -57,11 +58,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/servings_data_tv" />
 
-        <ExpandableListView
-            android:id="@+id/ingredients_exp_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/ingredient_title"></ExpandableListView>
+
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/steps_rlv"
@@ -70,7 +67,24 @@
             android:layout_marginTop="8dp"
             android:padding="8dp"
             android:scrollbars="vertical"
-            app:layout_constraintTop_toBottomOf="@id/ingredients_exp_list" />
+            app:layout_constraintTop_toBottomOf="@id/steps_title" />
+
+        <TextView
+            android:id="@+id/ingredient_title"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:text="Ingredients"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/steps_rlv" />
+
+        <ExpandableListView
+            android:id="@+id/ingredients_exp_list"
+            android:layout_width="match_parent"
+            android:layout_height="750dp"
+            android:scrollbars="vertical"
+            app:layout_constraintTop_toBottomOf="@id/ingredient_title" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
