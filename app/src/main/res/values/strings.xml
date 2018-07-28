@@ -5,7 +5,12 @@
     <string name="values">values</string>
 
     <!-- TODO: Remove before submiting -->
-    <string name="sample_name">Nutella Pie</string>
+    <string name="Steps">Steps: </string>
+    <string name="Steps_description">Click on a step for more information</string>
+
+    <string name="ingredients">Ingredients: </string>
+    <string name="ingredients_description">Click on a ingredient for quantity and measurement</string>
+
 
 
 </resources>
