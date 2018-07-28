@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">BakingApp</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="recipes_json_url">https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json</string>
     <string name="name_value_pairs">nameValuePairs</string>
     <string name="values">values</string>
+
+    <!-- TODO: Remove before submiting -->
+    <string name="sample_name">Nutella Pie</string>
+
+
 </resources>

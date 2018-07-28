@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+
 
 public class MainFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -37,6 +39,7 @@ public class MainFragment extends Fragment {
     public RecipeAdapter recipeAdb;
     private RequestQueue MQUEUE;
     private OnFragmentInteractionListener mListener;
+    @BindView(R.id.recipe_name_tv) ListView listView;
 
     public MainFragment() throws IOException {
         // Required empty public constructor
@@ -61,13 +64,6 @@ public class MainFragment extends Fragment {
             e.printStackTrace();
         }
         return rootView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(int position ) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(position);
-        }
     }
 
     @Override
@@ -99,7 +95,7 @@ public class MainFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(int postions);
+        void onFragmentInteraction(int postions, Recipe recipe);
 
     }
 
@@ -113,8 +109,6 @@ public class MainFragment extends Fragment {
             @Override
             public void onResponse(JSONArray response) {
                 int length = response.length();
-                //iterateThrough(response.toString());
-                Log.i("Length", String.valueOf(response.length()));
                 for (int i = 0; i < length ; i++)
                     try {
                         //Response
@@ -127,35 +121,23 @@ public class MainFragment extends Fragment {
                         Recipe recipe = new Gson().fromJson(recipeItems, Recipe.class);
                         listOfRecipes.add(recipe);
                         MrecipeNames.add(recipe.getName());
-                        Log.i("InsideForTry", String.valueOf(MrecipeNames));
 
-
-                        //Ingredients
-                        JsonObject recipeIngredientsObg = recipe.getIngredients();
-                        JsonArray recipeIngredients = recipeIngredientsObg.getAsJsonArray(values);
-                        String recipeIngredientsStr = recipeIngredients.toString();
-                        for (int j = 0; j < recipeIngredients.size(); j++) {
-                            iterateThrough(recipeIngredientsStr, i, j);
-                        }
                         //Steps
                         JsonObject recipeStepsObg = recipe.getSteps();
                         JsonArray recipeStepsAr = recipeStepsObg.getAsJsonArray(values);
                         String recipeStepsStr = recipeStepsAr.toString();
-                        Log.i("Steps", recipeStepsObg.toString());
 
                         for (int j = 0; j < recipeStepsAr.size(); j++) {
                             String sendToClass = iterateThrough(recipeStepsStr, i, j);
                             RecipeSteps recipeStepsClass = new Gson().fromJson(sendToClass, RecipeSteps.class);
                             recipeStepsClass.setRecipeName(recipe.getName());
-                            Log.i("ClassSteps", recipeStepsClass.getShortDesc());
+                            //Log.i("ClassSteps", recipeStepsClass.getShortDesc());
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView,listView);
-                Log.i("RecipeList", String.valueOf(listOfRecipes.size()));
-                Log.i("OutSideForTry", String.valueOf(MrecipeNames));
+                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView,listView, listOfRecipes);
 
             }
         }, new Response.ErrorListener(){
@@ -174,33 +156,20 @@ public class MainFragment extends Fragment {
                 String responseData = new Gson().toJson(responseObject);
                 JsonObject jsonObject = parser.parse(responseData).getAsJsonObject();
                 String recipeItems = parser.parse(jsonObject.get(NAME_VALUE_PAIRS).toString()).toString();
-                Log.i("Test", recipeItems);
                 return recipeItems;
         }
 
 
 
-    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView, ListView listView){
-        Log.i("populateui", String.valueOf(MrecipeNames));
-
+    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView, ListView listView, final List<Recipe> listOfRecipes){
         ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
         listView.setAdapter(listAdapter);
-        //listView.setOnClickListener(new listView.getOnItemClickListener());
         listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         DetailFragment detailFragment = null;
-                        mListener.onFragmentInteraction(i);
-                        //Log.i("Position", String.valueOf(i));
-                        //try {
-                        //    detailFragment = new DetailFragment();
-                        //} catch (IOException e) {
-                        //    e.printStackTrace();
-                        //}
-                        //FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                        //fragmentTransaction.replace(R.id.fragmentContainer, detailFragment);
-                        //fragmentTransaction.addToBackStack(null);
-                        //fragmentTransaction.commit();
+                        mListener.onFragmentInteraction(i, listOfRecipes.get(i));
+
                     }
         });
 
