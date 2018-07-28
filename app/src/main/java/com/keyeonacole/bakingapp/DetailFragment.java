@@ -1,6 +1,9 @@
 package com.keyeonacole.bakingapp;
 
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,10 +15,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.TransferListener;
+import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -23,6 +40,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,12 +58,16 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     @BindView(R.id.ingredients_exp_list) ExpandableListView ingredientsExpLv;
     @BindView(R.id.steps_rlv) RecyclerView stepsLV;
     @BindView(R.id.recipe_image) ImageView imageView;
+    @BindView(R.id.exoplayerview_activity_video) PlayerView videoPlayer;
+    @BindView(R.id.recipe_step_full_description) TextView stepDescription;
     private String RECIPES_URL_STRING = null;
     private String NAME_VALUE_PAIRS = null;
     private ExpandableListViewAdapter listViewAdapter;
     private List<String> ingredientName = new ArrayList<>();
     private HashMap<String,List<String>> ingredientHashMap = new HashMap<>();
     private List<RecipeSteps> recipeStepsList = new ArrayList<>();
+    private List<String> stepsVideoList = new ArrayList<>();
+
     private RecyclerRecipeAdapter recylerAdapter;
 
 
@@ -74,6 +96,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         for (int i = 0; i < recipeStepsAr.size(); i++) {
             Log.i("Iteration", iterateThrough(recipeStepsAr.toString(), i).toString());
             RecipeSteps recipeSteps = new Gson().fromJson(iterateThrough(recipeStepsAr.toString(), i), RecipeSteps.class);
+            stepsVideoList.add(recipeSteps.getVideoURL());
             recipeStepsList.add(recipeSteps);
         }
 
@@ -153,11 +176,42 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     @Override
     public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
 
+
         return false;
     }
 
     @Override
     public void onItemClick(View view, int position) {
+        Log.i("onClick", String.valueOf(position));
+        RecipeSteps currentStep = recipeStepsList.get(position);
+        Log.i("StepVideo", currentStep.getVideoURL());
+        stepDescription.setText(currentStep.getFullDesc());
+        stepDescription.setVisibility(View.VISIBLE);
+
+        //Prepare Track Selector for Video Player
+        Handler mainHandler = new Handler();
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        DefaultTrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        SimpleExoPlayer player =
+                ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+
+        videoPlayer.setPlayer(player);
+        videoPlayer.setVisibility(View.VISIBLE);
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                Util.getUserAgent(getContext(), "BakingApp"), (TransferListener<? super DataSource>) bandwidthMeter);
+
+        Uri mp4VideoUri = Uri.parse(stepsVideoList.get(position));
+        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(mp4VideoUri);
+
+        player.prepare(videoSource);
+
+
+
 
     }
 }
