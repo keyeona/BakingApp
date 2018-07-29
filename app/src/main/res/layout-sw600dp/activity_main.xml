@@ -21,7 +21,7 @@
         />
 
     <FrameLayout
-        android:layout_width="400dp"
+        android:layout_width="550dp"
         android:layout_height="wrap_content"
         android:id="@+id/fragmentContainerRight"
         android:layout_gravity="right"/>
