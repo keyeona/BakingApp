@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
@@ -24,17 +25,21 @@ import butterknife.BindView;
 
 
 public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener {
+    @BindView(R.id.tablet_view) FrameLayout tableView;
     private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //if ()
+        if (tableView != null){
+            mTwoPane = true;
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainFragment mainFragment = null;
 
         try {
+            Log.i("Tablet?", String.valueOf(mTwoPane));
             mainFragment = new MainFragment();
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
@@ -49,7 +54,37 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     @Override
     public void onFragmentInteraction(int i, Recipe recipe) {
                 //Toast.makeText(this,"postion Clicked " + i , Toast.LENGTH_SHORT).show();
+                if (mTwoPane = true){
+                    try {
+                        DetailFragment detailFragment = new DetailFragment();
 
+                        int id =recipe.getId();
+                        String name = recipe.getName();
+                        String servings = recipe.getServings();
+                        String image = recipe.getImage();
+                        JsonObject ingredients = recipe.getIngredients();
+                        JsonObject steps = recipe.getSteps();
+
+
+                        Bundle b = new Bundle();
+                        b.putString("name", name);
+                        b.putString("servings",servings);
+                        b.putString("image",image);
+                        b.putString("id", String.valueOf(id));
+                        b.putString("ingredients", ingredients.toString());
+                        b.putString("steps", steps.toString());
+                        detailFragment.setArguments(b);
+
+                        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .add(R.id.fragmentContainerRight, detailFragment)
+                                .commit();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
                 int id =recipe.getId();
                 String name = recipe.getName();
                 String servings = recipe.getServings();
@@ -63,12 +98,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                 b.putString("servings",servings);
                 b.putString("image",image);
                 b.putString("id", String.valueOf(id));
+                b.putString("ingredients", ingredients.toString());
+                b.putString("steps", steps.toString());
 
 
                 final Intent intent = new Intent(this, RecipeActivity.class);
                 intent.putExtra("bundle", b);
-                intent.putExtra("ingredients", ingredients.toString());
-                intent.putExtra("steps", steps.toString());
+                //intent.putExtra("ingredients", ingredients.toString());
+                //intent.putExtra("steps", steps.toString());
                 startActivity(intent);
 
     }

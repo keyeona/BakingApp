@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -86,10 +87,10 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
         ButterKnife.bind(this, view);
         ButterKnife.setDebug(true);
-
-        Bundle bundle = getActivity().getIntent().getExtras();
+        Bundle bundle = getArguments();
+        //Bundle bundle = getActivity().getIntent().getExtras();
         String ingredientsData = (String) bundle.get("ingredients");
-        Bundle recipeBundle = (Bundle) bundle.get("bundle");
+        //Bundle recipeBundle = (Bundle) bundle.get("bundle");
         String stepsData = (String) bundle.get("steps");
         Log.i("StepsData", ingredientsData);
 
@@ -121,9 +122,9 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
 
         // Set views
         Log.i("ingredientsData: ", ingredientsData);
-        String name = (String) recipeBundle.get("name");
-        String servings = (String) recipeBundle.get("servings");
-        String image = (String) recipeBundle.get("image");
+        String name = (String) bundle.get("name");
+        String servings = (String) bundle.get("servings");
+        String image = (String) bundle.get("image");
         Glide.with(this).load(image).into(imageView);
         title.setText(name);
         servingData.setText(servings);
