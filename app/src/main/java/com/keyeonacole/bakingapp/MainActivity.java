@@ -15,6 +15,8 @@ import com.google.gson.JsonObject;
 
 import java.io.IOException;
 
+import butterknife.BindView;
+
 
 // Suggestions: GJSON, SNACKBARS, LOG.(e...d), TIMBER,
 // Principles: Do not hard code strings
@@ -22,9 +24,12 @@ import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener {
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //if ()
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainFragment mainFragment = null;
