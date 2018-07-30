@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -93,6 +94,14 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         //Bundle recipeBundle = (Bundle) bundle.get("bundle");
         String stepsData = (String) bundle.get("steps");
         Log.i("StepsData", ingredientsData);
+        android.app.ActionBar actionBar = getActivity().getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+
+        }
+
+
 
         //Prep steps for view
         JsonObject recipeStepsObject = convertString(stepsData);
@@ -141,6 +150,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         stepsLV.setAdapter(recylerAdapter);
         return view;
     }
+
 
     public JsonObject convertString(String data){
         JsonObject convertedObject = null;
@@ -193,8 +203,8 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         Log.i("StepVideo", currentStep.getVideoURL());
         stepDescription.setText(currentStep.getFullDesc());
         stepDescription.setVisibility(View.VISIBLE);
-
-        if (stepsVideoList.get(position) != ""){
+        System.out.println(stepsVideoList.get(position));
+        if (stepsVideoList.get(position).length() > 0){
 
         //Prepare Track Selector for Video Player
         Handler mainHandler = new Handler();
@@ -215,6 +225,10 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(mp4VideoUri);
         player.prepare(videoSource);
+
+        }else{
+            videoPlayer.setVisibility(View.GONE);
+            Toast.makeText(getContext(),"Sorry No video for Step: " + (position) , Toast.LENGTH_SHORT).show();
 
         }
 

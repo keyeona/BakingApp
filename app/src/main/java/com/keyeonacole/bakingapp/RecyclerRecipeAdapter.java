@@ -42,7 +42,7 @@ public class RecyclerRecipeAdapter extends RecyclerView.Adapter<RecyclerRecipeAd
     @Override
     public void onBindViewHolder(@NonNull RecyclerRecipeAdapter.ViewHolder holder, int position) {
         RecipeSteps steps = recipeStepsList.get(position);
-        String id = String.valueOf(steps.getStepId() + 1 );
+        String id = String.valueOf(steps.getStepId() );
         holder.stepID.setText(id);
         holder.shortDescription.setText(steps.getShortDesc());
     }

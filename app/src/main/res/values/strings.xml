@@ -10,7 +10,8 @@
 
     <string name="ingredients">Ingredients: </string>
     <string name="ingredients_description">Click on a ingredient for quantity and measurement</string>
-
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 
 </resources>

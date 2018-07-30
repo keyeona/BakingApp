@@ -6,12 +6,20 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -31,6 +39,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(false);
+
+        }
 
         if (findViewById(R.id.tablet_view) != null){
             mTwoPane = true;
@@ -57,6 +71,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     @Override
     public void onFragmentInteraction(int i, Recipe recipe) {
                 //Toast.makeText(this,"postion Clicked " + i , Toast.LENGTH_SHORT).show();
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        DefaultTrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+                SimpleExoPlayer player =
+                ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+                player.release();
                 if (findViewById(R.id.tablet_view) != null){
                     try {
                         DetailFragment detailFragment = new DetailFragment();
@@ -112,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
                         fragmentManager.beginTransaction()
                                 .replace(R.id.fragmentContainer, detailFragment)
+                                .addToBackStack("home")
                                 .commit();
 
                     } catch (IOException e) {
