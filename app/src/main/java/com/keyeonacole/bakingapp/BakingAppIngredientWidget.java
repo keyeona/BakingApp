@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.RemoteViews;
@@ -28,11 +29,7 @@ public class BakingAppIngredientWidget extends AppWidgetProvider {
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
         views.setOnClickPendingIntent(R.id.image, pendingIntent);
         Intent intent1 = new Intent(context, RecipeIngredientIntentService.class);
-        Bundle b = intent1.getExtras();
-        List<String> listofRecipes = (List<String>) b.get("Ingredients");
-        ArrayAdapter<String> itemsAdapter =
-                new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, listofRecipes);
-        listview.setRemoteAdapter(R.id.widgetListview, intent1);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("IngredientSet", 0);
 
 
         // Instruct the widget manager to update the widget

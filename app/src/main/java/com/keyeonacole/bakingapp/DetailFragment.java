@@ -1,6 +1,7 @@
 package com.keyeonacole.bakingapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,7 +47,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,6 +74,8 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     private HashMap<String,List<String>> ingredientHashMap = new HashMap<>();
     private List<RecipeSteps> recipeStepsList = new ArrayList<>();
     private List<String> stepsVideoList = new ArrayList<>();
+    private SharedPreferences rPreferences;
+
 
 
     private RecyclerRecipeAdapter recylerAdapter;
@@ -138,6 +143,13 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         title.setText(name);
         servingData.setText(servings);
         //Expandable View
+        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = rPreferences.edit();
+        Log.i("IngredientName", ingredientName.toString());
+        edit.putString("ingredients", ingredientName.toString());
+        Set<String> ingredientSet = new HashSet<String>(ingredientName);
+        edit.putStringSet("IngredientSet", ingredientSet);
+        edit.apply();
         ingredientsExpLv.setOnGroupExpandListener(this);
         ingredientsExpLv.setOnGroupCollapseListener(this);
         ingredientsExpLv.setOnChildClickListener(this);
