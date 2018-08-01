@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
             actionBar.setDisplayHomeAsUpEnabled(false);
 
         }
-        //SharesPrefernces Listener
+        //SharesPreferences Listener
 
         SharedPreferences rPreferences  = getSharedPreferences("SaveIngredients", Context.MODE_PRIVATE);
         rPreferences.registerOnSharedPreferenceChangeListener(listener);
@@ -77,8 +77,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
 
                       rPreferences.registerOnSharedPreferenceChangeListener(listener);
 
