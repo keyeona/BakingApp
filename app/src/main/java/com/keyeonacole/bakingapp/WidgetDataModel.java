@@ -30,6 +30,7 @@ public class WidgetDataModel {
 
     public static ArrayList<WidgetDataModel> getDataFromSharedPrefs(Context context) {
         ArrayList<WidgetDataModel> list = new ArrayList<>();
+        list.clear();
         if(list.isEmpty()) {
             SharedPreferences sharedPref = context.getSharedPreferences("SaveIngredients", Context.MODE_PRIVATE);
             Set<String> ingredientSet = new HashSet<String>();

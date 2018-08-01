@@ -2,7 +2,9 @@ package com.keyeonacole.bakingapp;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
@@ -48,32 +50,38 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
             actionBar.setDisplayHomeAsUpEnabled(false);
 
         }
+        //SharesPrefernces Listener
+
+        SharedPreferences rPreferences  = getSharedPreferences("SaveIngredients", Context.MODE_PRIVATE);
+        rPreferences.registerOnSharedPreferenceChangeListener(listener);
         //Why does this always return false; What am I doing wrong?
         if (findViewById(R.id.tablet_view) != null){
             mTwoPane = true;
         }else{
             mTwoPane = false;
         }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainFragment mainFragment = null;
-        if (savedInstanceState == null){
-
-
         try {
+            rPreferences.registerOnSharedPreferenceChangeListener(listener);
             Log.i("Tablet?", String.valueOf(mTwoPane));
             mainFragment = new MainFragment();
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .add(R.id.fragmentContainer, mainFragment)
-                    .commit();
+            if (savedInstanceState == null ) {
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragmentContainer, mainFragment)
+                        .commit();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        }else {
-            getSupportFragmentManager().getFragment(savedInstanceState, "myFragmentName");
 
-        }
+
+
+                      rPreferences.registerOnSharedPreferenceChangeListener(listener);
+
 
     }
 
@@ -88,7 +96,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                 SimpleExoPlayer player =
                 ExoPlayerFactory.newSimpleInstance(this, trackSelector);
                 player.release();
-                if (findViewById(R.id.tablet_view) != null){
+        SharedPreferences rPreferences  = getSharedPreferences("SaveIngredients", Context.MODE_PRIVATE);
+        rPreferences.registerOnSharedPreferenceChangeListener(listener);
+
+
+
+        if (findViewById(R.id.tablet_view) != null){
                     try {
                         DetailFragment detailFragment = new DetailFragment();
 
@@ -166,4 +179,13 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
 
 
     }
+
+    SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            Log.i("PreferenceChanged", key);
+            Intent intent = new Intent(getApplicationContext(), BakingAppIngredientWidget.class);
+            intent.setAction("AppWidgetManager.ACTION_APPWIDGET_UPDATE");
+            sendBroadcast(intent);
+        }
+    };
 }

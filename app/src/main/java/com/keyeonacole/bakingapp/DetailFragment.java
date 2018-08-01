@@ -85,86 +85,105 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        NAME_VALUE_PAIRS = getResources().getString(R.string.name_value_pairs);
-        final String values = getResources().getString(R.string.values);
-        View view = inflater.inflate(R.layout.fragment_detail, container, false);
-        ButterKnife.bind(this, view);
-        ButterKnife.setDebug(true);
-        Bundle bundle = getArguments();
-        //Bundle bundle = getActivity().getIntent().getExtras();
-        String ingredientsData = (String) bundle.get("ingredients");
-        //Bundle recipeBundle = (Bundle) bundle.get("bundle");
-        String stepsData = (String) bundle.get("steps");
-        Log.i("StepsData", ingredientsData);
-        android.app.ActionBar actionBar = getActivity().getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+
+
+
+            NAME_VALUE_PAIRS = getResources().getString(R.string.name_value_pairs);
+            final String values = getResources().getString(R.string.values);
+            View view = inflater.inflate(R.layout.fragment_detail, container, false);
+            ButterKnife.bind(this, view);
+            ButterKnife.setDebug(true);
+            Bundle bundle = getArguments();
+            //Bundle bundle = getActivity().getIntent().getExtras();
+            String ingredientsData = (String) bundle.get("ingredients");
+            //Bundle recipeBundle = (Bundle) bundle.get("bundle");
+            String stepsData = (String) bundle.get("steps");
+            Log.i("StepsData", ingredientsData);
+            android.app.ActionBar actionBar = getActivity().getActionBar();
+            if (actionBar != null) {
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+
+            }
+
+
+            //Prep steps for view
+            JsonObject recipeStepsObject = convertString(stepsData);
+            JsonArray recipeStepsAr = recipeStepsObject.getAsJsonArray(values);
+            for (int i = 0; i < recipeStepsAr.size(); i++) {
+                Log.i("Iteration", iterateThrough(recipeStepsAr.toString(), i).toString());
+                RecipeSteps recipeSteps = new Gson().fromJson(iterateThrough(recipeStepsAr.toString(), i), RecipeSteps.class);
+                stepsVideoList.add(recipeSteps.getVideoURL());
+                recipeStepsList.add(recipeSteps);
+            }
+
+
+            //Prep ingredients for view
+            JsonObject ingredientsObject = convertString(ingredientsData);
+            JsonArray recipeIngredients = ingredientsObject.getAsJsonArray(values);
+            String recipeIngredientsStr = recipeIngredients.toString();
+            for (int j = 0; j < recipeIngredients.size(); j++) {
+                RecipeIngredients RI = new Gson().fromJson(iterateThrough(recipeIngredientsStr, j), RecipeIngredients.class);
+                List<String> dropDownList = new ArrayList<>();
+                dropDownList.add("Measurement: " + RI.getmeasure());
+                dropDownList.add(String.valueOf("Quantity: " + RI.getquantity()));
+                ingredientName.add(RI.getingredient());
+                ingredientHashMap.put(RI.getingredient(), dropDownList);
+            }
+
+
+            //SharedPrefs
+            SharedPreferences rPreferences = getContext().getSharedPreferences("SaveIngredients", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit = rPreferences.edit();
+            Log.i("IngredientName", ingredientName.toString());
+            edit.putString("ingredients", ingredientName.toString());
+            Set<String> ingredientSet = new HashSet<String>(ingredientName);
+            edit.putStringSet("IngredientSet", ingredientSet);
+            edit.apply();
+            Log.i("sharedPrefs", String.valueOf(rPreferences.getString("ingredients", "[]")));
+
+            Log.i("HashMap :", ingredientHashMap.toString());
+
+            // Set views
+            Log.i("ingredientsData: ", ingredientsData);
+            String name = (String) bundle.get("name");
+            String servings = (String) bundle.get("servings");
+            String image = (String) bundle.get("image");
+            Glide.with(this).load(image).into(imageView);
+            title.setText(name);
+            servingData.setText(servings);
+
+
+            //Expandable View
+            ingredientsExpLv.setOnGroupExpandListener(this);
+            ingredientsExpLv.setOnGroupCollapseListener(this);
+            ingredientsExpLv.setOnChildClickListener(this);
+            listViewAdapter = new ExpandableListViewAdapter(getContext(), ingredientName, ingredientHashMap);
+            ingredientsExpLv.setAdapter(listViewAdapter);
+
+            //RecyclerView
+            stepsLV.setLayoutManager(new LinearLayoutManager(getContext()));
+            recylerAdapter = new RecyclerRecipeAdapter(getContext(), recipeStepsList);
+            recylerAdapter.setClickListener(this);
+            stepsLV.setAdapter(recylerAdapter);
+
+        if(savedInstanceState != null && savedInstanceState.getBoolean("PlayerState")) {
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            DefaultTrackSelector trackSelector =
+                    new DefaultTrackSelector(videoTrackSelectionFactory);
+            SimpleExoPlayer player =
+                    ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+            //videoPlayer.setVisibility(savedInstanceState.getInt("vVisibility"));
+
+
 
         }
+            return view;
 
-
-
-        //Prep steps for view
-        JsonObject recipeStepsObject = convertString(stepsData);
-        JsonArray recipeStepsAr = recipeStepsObject.getAsJsonArray(values);
-        for (int i = 0; i < recipeStepsAr.size(); i++) {
-            Log.i("Iteration", iterateThrough(recipeStepsAr.toString(), i).toString());
-            RecipeSteps recipeSteps = new Gson().fromJson(iterateThrough(recipeStepsAr.toString(), i), RecipeSteps.class);
-            stepsVideoList.add(recipeSteps.getVideoURL());
-            recipeStepsList.add(recipeSteps);
-        }
-
-
-        //Prep ingredients for view
-        JsonObject ingredientsObject = convertString(ingredientsData);
-        JsonArray recipeIngredients = ingredientsObject.getAsJsonArray(values);
-        String recipeIngredientsStr = recipeIngredients.toString();
-        for (int j = 0; j < recipeIngredients.size(); j++) {
-            RecipeIngredients RI = new Gson().fromJson(iterateThrough(recipeIngredientsStr, j), RecipeIngredients.class);
-            List<String> dropDownList = new ArrayList<>();
-            dropDownList.add("Measurement: " + RI.getmeasure());
-            dropDownList.add(String.valueOf("Quantity: " + RI.getquantity()));
-            ingredientName.add(RI.getingredient());
-            ingredientHashMap.put(RI.getingredient(), dropDownList);
-        }
-
-
-        //SharedPrefs
-        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = rPreferences.edit();
-        Log.i("IngredientName", ingredientName.toString());
-        edit.putString("ingredients", ingredientName.toString());
-        Set<String> ingredientSet = new HashSet<String>(ingredientName);
-        edit.putStringSet("IngredientSet", ingredientSet);
-        edit.apply();
-        Log.i("sharedPrefs", String.valueOf(rPreferences.getString("ingredients", "[]")));
-
-        Log.i("HashMap :", ingredientHashMap.toString());
-
-        // Set views
-        Log.i("ingredientsData: ", ingredientsData);
-        String name = (String) bundle.get("name");
-        String servings = (String) bundle.get("servings");
-        String image = (String) bundle.get("image");
-        Glide.with(this).load(image).into(imageView);
-        title.setText(name);
-        servingData.setText(servings);
-
-
-        //Expandable View
-        ingredientsExpLv.setOnGroupExpandListener(this);
-        ingredientsExpLv.setOnGroupCollapseListener(this);
-        ingredientsExpLv.setOnChildClickListener(this);
-        listViewAdapter = new ExpandableListViewAdapter(getContext(),ingredientName,ingredientHashMap);
-        ingredientsExpLv.setAdapter(listViewAdapter);
-        //RecyclerView
-        stepsLV.setLayoutManager(new LinearLayoutManager(getContext()));
-        recylerAdapter = new RecyclerRecipeAdapter(getContext(), recipeStepsList);
-        recylerAdapter.setClickListener(this);
-        stepsLV.setAdapter(recylerAdapter);
-        return view;
     }
+
 
 
     public JsonObject convertString(String data){
@@ -242,6 +261,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
                 .createMediaSource(mp4VideoUri);
         player.prepare(videoSource);
 
+
         }else{
             videoPlayer.setVisibility(View.GONE);
             Toast.makeText(getContext(),"Sorry No video for Step: " + (position) , Toast.LENGTH_SHORT).show();
@@ -264,5 +284,30 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
                 ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
         player.release();
 
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("PlayerState", videoPlayer.isShown());
+
+        if (videoPlayer.isShown()) {
+            outState.putInt("vVisibility", videoPlayer.getVisibility());
+            outState.putLong("vpPosition", videoPlayer.getPlayer().getCurrentPosition());
+            outState.putInt("vpPlayback", videoPlayer.getPlayer().getPlaybackState());
+            outState.putInt("adVisibitlity", stepDescription.getVisibility());
+            outState.putInt("position", stepDescription.getText().charAt(0));
+        }
+
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if(savedInstanceState != null && savedInstanceState.getBoolean("PlayerState")) {
+            int pos = savedInstanceState.getInt("adVisibility");
+            //Maybe this isn't the best way to do this
+//            stepsLV.findViewHolderForAdapterPosition(pos).itemView.performClick();
+        }
     }
 }

@@ -1,17 +1,14 @@
 package com.keyeonacole.bakingapp;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -22,13 +19,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 
@@ -60,9 +57,7 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
         MrecipeNames = new ArrayList<String>();
-        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
-        Set<String> ingredientSet = new HashSet<String>();
-        Log.i("sharedPrefs", String.valueOf(rPreferences.getStringSet("IngredientSet", ingredientSet)));
+
 
         try {
             readUrl(RECIPES_URL_STRING, inflater, rootView, listView);
