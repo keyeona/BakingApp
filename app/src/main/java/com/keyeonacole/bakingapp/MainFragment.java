@@ -1,5 +1,6 @@
 package com.keyeonacole.bakingapp;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,7 +26,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 
@@ -41,6 +44,8 @@ public class MainFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     @BindView(R.id.recipe_name_tv) ListView listView;
 
+
+
     public MainFragment() throws IOException {
         // Required empty public constructor
     }
@@ -55,6 +60,9 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
         MrecipeNames = new ArrayList<String>();
+        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
+        Set<String> ingredientSet = new HashSet<String>();
+        Log.i("sharedPrefs", String.valueOf(rPreferences.getStringSet("IngredientSet", ingredientSet)));
 
         try {
             readUrl(RECIPES_URL_STRING, inflater, rootView, listView);

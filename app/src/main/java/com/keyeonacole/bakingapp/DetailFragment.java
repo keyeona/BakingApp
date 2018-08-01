@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -44,7 +42,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,6 +129,17 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             ingredientHashMap.put(RI.getingredient(), dropDownList);
         }
 
+
+        //SharedPrefs
+        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = rPreferences.edit();
+        Log.i("IngredientName", ingredientName.toString());
+        edit.putString("ingredients", ingredientName.toString());
+        Set<String> ingredientSet = new HashSet<String>(ingredientName);
+        edit.putStringSet("IngredientSet", ingredientSet);
+        edit.apply();
+        Log.i("sharedPrefs", String.valueOf(rPreferences.getString("ingredients", "[]")));
+
         Log.i("HashMap :", ingredientHashMap.toString());
 
         // Set views
@@ -142,14 +150,9 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         Glide.with(this).load(image).into(imageView);
         title.setText(name);
         servingData.setText(servings);
+
+
         //Expandable View
-        SharedPreferences rPreferences  = getContext().getSharedPreferences("SaveIngredients",Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = rPreferences.edit();
-        Log.i("IngredientName", ingredientName.toString());
-        edit.putString("ingredients", ingredientName.toString());
-        Set<String> ingredientSet = new HashSet<String>(ingredientName);
-        edit.putStringSet("IngredientSet", ingredientSet);
-        edit.apply();
         ingredientsExpLv.setOnGroupExpandListener(this);
         ingredientsExpLv.setOnGroupCollapseListener(this);
         ingredientsExpLv.setOnChildClickListener(this);
@@ -209,6 +212,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     @Override
     public void onItemClick(View view, int position) {
 
+
         scrollView.setScrollY(0);
         Log.i("onClick", String.valueOf(position));
         RecipeSteps currentStep = recipeStepsList.get(position);
@@ -256,7 +260,6 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
                 new AdaptiveTrackSelection.Factory(bandwidthMeter);
         DefaultTrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
-
         SimpleExoPlayer player =
                 ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
         player.release();

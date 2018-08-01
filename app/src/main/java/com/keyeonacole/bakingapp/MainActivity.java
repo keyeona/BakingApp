@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
@@ -37,15 +38,17 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     @BindView(R.id.fragmentContainerRight) FrameLayout containerRight;
     private boolean mTwoPane;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
 
         }
-
+        //Why does this always return false; What am I doing wrong?
         if (findViewById(R.id.tablet_view) != null){
             mTwoPane = true;
         }else{
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainFragment mainFragment = null;
+        if (savedInstanceState == null){
+
 
         try {
             Log.i("Tablet?", String.valueOf(mTwoPane));
@@ -64,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                     .commit();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        }else {
+            getSupportFragmentManager().getFragment(savedInstanceState, "myFragmentName");
+
         }
 
     }
@@ -141,6 +150,20 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                         e.printStackTrace();
                     }
                 }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        try {
+            DetailFragment detailFragment = new DetailFragment();
+            getSupportFragmentManager().putFragment(outState, "myFragmentName",detailFragment);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 }

@@ -33,16 +33,17 @@ public class clickRecipeStartFragment {
 
     @Test
     public void clickRecipeStartFragment(){
-
-
         //Find the view
         //Perform action on the view
         Espresso.onView(withId(R.id.fragmentContainer)).check(matches(isEnabled()));
-        //Espresso.onView(withId(R.id.recipe_name_tv)).check(matches(isEnabled()));
 
         //Check if the view does what you expected
         //Espresso.onView(withId(R.id.recipe_Title_tv)).check(matches(isDisplayed()));
+    }
 
+    @Test
+    public void checkRecipeTitleTextView(){
+        Espresso.onView(withId(R.id.recipe_name_tv)).check(matches(isEnabled()));
 
     }
 
