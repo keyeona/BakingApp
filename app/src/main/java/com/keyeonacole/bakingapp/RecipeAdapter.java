@@ -54,7 +54,7 @@ public class RecipeAdapter extends ArrayAdapter<Recipe> {
             if (convertView == null) {
                 vi = inflater.inflate(R.layout.fragment_main, null);
                 holder = new ViewHolder();
-                holder.display_name = (ListView) vi.findViewById(R.id.recipe_name_tv);
+                //holder.display_name = (ListView) vi.findViewById(R.id.recipe_name_tv);
 
                 vi.setTag(holder);
             } else {

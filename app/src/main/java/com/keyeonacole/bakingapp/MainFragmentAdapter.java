@@ -3,6 +3,7 @@ package com.keyeonacole.bakingapp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter<MainFragmentAdapte
 
     private List<String> recipeList;
     private LayoutInflater mInflater;
-    private MainFragmentAdapter.ItemClickListener mClickListener;
+    private ItemClickListener mClickListener;
 
     // data is passed into the constructor
     MainFragmentAdapter(Context context, List<String> items) {
@@ -40,6 +41,8 @@ public class MainFragmentAdapter extends RecyclerView.Adapter<MainFragmentAdapte
     @Override
     public void onBindViewHolder(@NonNull MainFragmentAdapter.ViewHolder holder, int position) {
         String id = recipeList.get(position);
+        Log.i("postiton", String.valueOf(position));
+        Log.i("RecipeList", id);
         holder.recipe.setText(id);
     }
 
@@ -71,7 +74,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter<MainFragmentAdapte
     }
 
     // allows clicks events to be caught
-    void setClickListener(MainFragmentAdapter.ItemClickListener itemClickListener) {
+    void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 

@@ -2,6 +2,9 @@ package com.keyeonacole.bakingapp;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +42,6 @@ public class MainFragment extends Fragment {
     public RecipeAdapter recipeAdb;
     private RequestQueue MQUEUE;
     private OnFragmentInteractionListener mListener;
-    @BindView(R.id.recipe_name_tv) ListView listView;
 
 
 
@@ -55,14 +57,15 @@ public class MainFragment extends Fragment {
         RECIPES_URL_STRING = getResources().getString(R.string.recipes_json_url);
         NAME_VALUE_PAIRS = getResources().getString(R.string.name_value_pairs);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
+        //ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         MrecipeNames = new ArrayList<String>();
 
 
         try {
-            readUrl(RECIPES_URL_STRING, inflater, rootView, listView);
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
-            listView.setAdapter(listAdapter);
+            readUrl(RECIPES_URL_STRING, inflater, rootView, recyclerView);
+            //ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
+            //listView.setAdapter(listAdapter);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,6 +89,8 @@ public class MainFragment extends Fragment {
         mListener = null;
     }
 
+
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -102,7 +107,7 @@ public class MainFragment extends Fragment {
 
     }
 
-    private void readUrl(String url, final LayoutInflater inflater, final View rootView, final ListView listView) throws Exception{
+    private void readUrl(String url, final LayoutInflater inflater, final View rootView, final RecyclerView recyclerView) throws Exception{
         final JsonParser parser = new JsonParser();
         final  String nameValuePairs = getResources().getString(R.string.name_value_pairs);
         final String values = getResources().getString(R.string.values);
@@ -140,7 +145,7 @@ public class MainFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView,listView, listOfRecipes);
+                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView, listOfRecipes, recyclerView);
 
             }
         }, new Response.ErrorListener(){
@@ -164,18 +169,39 @@ public class MainFragment extends Fragment {
 
 
 
-    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView, ListView listView, final List<Recipe> listOfRecipes){
-        ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
-        listView.setAdapter(listAdapter);
-        listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        DetailFragment detailFragment = null;
-                        mListener.onFragmentInteraction(i, listOfRecipes.get(i));
+    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView,  final List<Recipe> listOfRecipes, RecyclerView recyclerView){
+        //ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
+        //listView.setAdapter(listAdapter);
+        //listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+        //            @Override
+        //            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        //                DetailFragment detailFragment = null;
+        //                mListener.onFragmentInteraction(i, listOfRecipes.get(i));
+        //
+        //            }
+        //});
 
-                    }
+        //RecyclerView
+        //listView.setVisibility(View.GONE);
+
+
+        MainFragmentAdapter recipeAdapter = new MainFragmentAdapter(getContext(), MrecipeNames);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(recipeAdapter);
+        recipeAdapter.setClickListener(new MainFragmentAdapter.ItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Log.i("MainRecycler", String.valueOf(position));
+                DetailFragment detailFragment = null;
+                mListener.onFragmentInteraction(position, listOfRecipes.get(position));
+                Log.i("Count", String.valueOf(MrecipeNames.size()));
+            }
         });
 
+
+
     }
+
+
 
 }
