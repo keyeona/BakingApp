@@ -41,7 +41,7 @@ public class MainFragmentAdapter extends RecyclerView.Adapter<MainFragmentAdapte
     @Override
     public void onBindViewHolder(@NonNull MainFragmentAdapter.ViewHolder holder, int position) {
         String id = recipeList.get(position);
-        Log.i("postiton", String.valueOf(position));
+        Log.i("position", String.valueOf(position));
         Log.i("RecipeList", id);
         holder.recipe.setText(id);
     }

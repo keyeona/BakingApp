@@ -15,7 +15,7 @@
     <FrameLayout
         android:layout_width="400dp"
         android:layout_height="wrap_content"
-        android:id="@+id/fragmentContainer"></FrameLayout>
+        android:id="@+id/fragmentContainer"/>
 
 
 </LinearLayout>
