@@ -2,6 +2,7 @@ package com.keyeonacole.bakingapp;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -156,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
                                 .replace(R.id.fragmentContainer, detailFragment)
                                 .addToBackStack("home")
                                 .commit();
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -181,9 +181,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             Log.i("PreferenceChanged", key);
-            Intent intent = new Intent(getApplicationContext(), BakingAppIngredientWidget.class);
-            intent.setAction("AppWidgetManager.ACTION_APPWIDGET_UPDATE");
+            Intent intent = new Intent(getApplicationContext(), ListViewWidgetService.class);
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             sendBroadcast(intent);
+
         }
     };
 }

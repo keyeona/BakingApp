@@ -21,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -72,10 +74,33 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
     private List<RecipeSteps> recipeStepsList = new ArrayList<>();
     private List<String> stepsVideoList = new ArrayList<>();
     private SharedPreferences rPreferences;
-
-
-
     private RecyclerRecipeAdapter recylerAdapter;
+
+
+    //Strings
+    private String INGREDIENT_STRING = "ingredients";
+    private String STEPS_STRING = "steps";
+    private String TAG = "DetailFragment";
+    private String MEASUREMENT_STRING = "Measurement: ";
+    private String QUANTITY_STRING = "Quantity: ";
+
+    // Saved instance state keys.
+    //https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
+    private static final String KEY_TRACK_SELECTOR_PARAMETERS = "track_selector_parameters";
+    private static final String KEY_WINDOW = "window";
+    private static final String KEY_POSITION = "position";
+    private static final String KEY_AUTO_PLAY = "auto_play";
+
+    private DefaultTrackSelector.Parameters trackSelectorParameters;
+    private boolean startAutoPlay;
+    private int startWindow;
+    private long startPosition;
+    private SimpleExoPlayer player;
+    private DefaultTrackSelector trackSelector;
+
+
+
+
 
 
     public DetailFragment() throws IOException{
@@ -94,11 +119,9 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             ButterKnife.bind(this, view);
             ButterKnife.setDebug(true);
             Bundle bundle = getArguments();
-            //Bundle bundle = getActivity().getIntent().getExtras();
-            String ingredientsData = (String) bundle.get("ingredients");
-            //Bundle recipeBundle = (Bundle) bundle.get("bundle");
-            String stepsData = (String) bundle.get("steps");
-            Log.i("StepsData", ingredientsData);
+            String ingredientsData = (String) bundle.get(INGREDIENT_STRING);
+            String stepsData = (String) bundle.get(STEPS_STRING);
+            Log.i(TAG + "1", ingredientsData);
             android.app.ActionBar actionBar = getActivity().getActionBar();
             if (actionBar != null) {
                 actionBar.setHomeButtonEnabled(true);
@@ -111,7 +134,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             JsonObject recipeStepsObject = convertString(stepsData);
             JsonArray recipeStepsAr = recipeStepsObject.getAsJsonArray(values);
             for (int i = 0; i < recipeStepsAr.size(); i++) {
-                Log.i("Iteration", iterateThrough(recipeStepsAr.toString(), i).toString());
+                Log.i(TAG + "2", iterateThrough(recipeStepsAr.toString(), i).toString());
                 RecipeSteps recipeSteps = new Gson().fromJson(iterateThrough(recipeStepsAr.toString(), i), RecipeSteps.class);
                 stepsVideoList.add(recipeSteps.getVideoURL());
                 recipeStepsList.add(recipeSteps);
@@ -125,8 +148,8 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             for (int j = 0; j < recipeIngredients.size(); j++) {
                 RecipeIngredients RI = new Gson().fromJson(iterateThrough(recipeIngredientsStr, j), RecipeIngredients.class);
                 List<String> dropDownList = new ArrayList<>();
-                dropDownList.add("Measurement: " + RI.getmeasure());
-                dropDownList.add(String.valueOf("Quantity: " + RI.getquantity()));
+                dropDownList.add(MEASUREMENT_STRING + RI.getmeasure());
+                dropDownList.add(String.valueOf(QUANTITY_STRING + RI.getquantity()));
                 ingredientName.add(RI.getingredient());
                 ingredientHashMap.put(RI.getingredient(), dropDownList);
             }
@@ -167,20 +190,17 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             recylerAdapter.setClickListener(this);
             stepsLV.setAdapter(recylerAdapter);
 
-        if(savedInstanceState != null && savedInstanceState.getBoolean("PlayerState")) {
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelection.Factory videoTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            DefaultTrackSelector trackSelector =
-                    new DefaultTrackSelector(videoTrackSelectionFactory);
-            SimpleExoPlayer player =
-                    ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+        if (savedInstanceState != null) {
+            trackSelectorParameters = savedInstanceState.getParcelable(KEY_TRACK_SELECTOR_PARAMETERS);
+            startAutoPlay = savedInstanceState.getBoolean(KEY_AUTO_PLAY);
+            startWindow = savedInstanceState.getInt(KEY_WINDOW);
+            startPosition = savedInstanceState.getLong(KEY_POSITION);
             //videoPlayer.setVisibility(savedInstanceState.getInt("vVisibility"));
-
-
-
+        } else {
+            trackSelectorParameters = new DefaultTrackSelector.ParametersBuilder().build();
+            clearStartPosition();
         }
-            return view;
+        return view;
 
     }
 
@@ -249,7 +269,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         DefaultTrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        SimpleExoPlayer player =
+        final SimpleExoPlayer player =
                 ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
         videoPlayer.setPlayer(player);
         videoPlayer.setVisibility(View.VISIBLE);
@@ -266,6 +286,7 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             videoPlayer.setVisibility(View.GONE);
             Toast.makeText(getContext(),"Sorry No video for Step: " + (position) , Toast.LENGTH_SHORT).show();
 
+
         }
 
     }
@@ -275,30 +296,43 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
         super.onPause();
 
         //Prepare Track Selector for Video Player
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        DefaultTrackSelector trackSelector =
-                new DefaultTrackSelector(videoTrackSelectionFactory);
-        SimpleExoPlayer player =
-                ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
-        player.release();
+        //player.setPlayWhenReady(false);
 
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.clear();
         outState.putBoolean("PlayerState", videoPlayer.isShown());
 
         if (videoPlayer.isShown()) {
             outState.putInt("vVisibility", videoPlayer.getVisibility());
-            outState.putLong("vpPosition", videoPlayer.getPlayer().getCurrentPosition());
-            outState.putInt("vpPlayback", videoPlayer.getPlayer().getPlaybackState());
             outState.putInt("adVisibitlity", stepDescription.getVisibility());
             outState.putInt("position", stepDescription.getText().charAt(0));
+            updateTrackSelectorParameters();
+            updateStartPosition();
+            outState.putParcelable(KEY_TRACK_SELECTOR_PARAMETERS, trackSelectorParameters);
+            outState.putBoolean(KEY_AUTO_PLAY, startAutoPlay);
+            outState.putInt(KEY_WINDOW, startWindow);
+            outState.putLong(KEY_POSITION, startPosition);
+
         }
 
+    }
+    //https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
+    private void updateTrackSelectorParameters() {
+        if (trackSelector != null) {
+            trackSelectorParameters = trackSelector.getParameters();
+        }
+    }
+    //
+    private void updateStartPosition() {
+        if (player != null) {
+            startAutoPlay = player.getPlayWhenReady();
+            startWindow = player.getCurrentWindowIndex();
+            startPosition = Math.max(0, player.getContentPosition());
+        }
     }
 
     @Override
@@ -309,5 +343,11 @@ public class DetailFragment extends Fragment implements ExpandableListView.OnGro
             //Maybe this isn't the best way to do this
 //            stepsLV.findViewHolderForAdapterPosition(pos).itemView.performClick();
         }
+    }
+    //https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
+    private void clearStartPosition() {
+        startAutoPlay = true;
+        startWindow = C.INDEX_UNSET;
+        startPosition = C.TIME_UNSET;
     }
 }

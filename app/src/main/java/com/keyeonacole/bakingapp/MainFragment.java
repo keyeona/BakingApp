@@ -8,10 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -22,15 +18,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 
 
 public class MainFragment extends Fragment {
@@ -58,12 +51,11 @@ public class MainFragment extends Fragment {
         NAME_VALUE_PAIRS = getResources().getString(R.string.name_value_pairs);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         //ListView listView = (ListView) rootView.findViewById(R.id.recipe_name_tv);
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         MrecipeNames = new ArrayList<String>();
 
 
         try {
-            readUrl(RECIPES_URL_STRING, inflater, rootView, recyclerView);
+            readUrl(RECIPES_URL_STRING, inflater, rootView);
             //ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
             //listView.setAdapter(listAdapter);
         } catch (Exception e) {
@@ -107,7 +99,7 @@ public class MainFragment extends Fragment {
 
     }
 
-    private void readUrl(String url, final LayoutInflater inflater, final View rootView, final RecyclerView recyclerView) throws Exception{
+    private void readUrl(String url, final LayoutInflater inflater, final View rootView) throws Exception{
         final JsonParser parser = new JsonParser();
         final  String nameValuePairs = getResources().getString(R.string.name_value_pairs);
         final String values = getResources().getString(R.string.values);
@@ -145,7 +137,7 @@ public class MainFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView, listOfRecipes, recyclerView);
+                populateUI((ArrayList<String>) MrecipeNames,inflater,rootView, listOfRecipes);
 
             }
         }, new Response.ErrorListener(){
@@ -169,7 +161,7 @@ public class MainFragment extends Fragment {
 
 
 
-    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView,  final List<Recipe> listOfRecipes, RecyclerView recyclerView){
+    public void populateUI(ArrayList<String> recipeName, final LayoutInflater inflater, View rootView, final List<Recipe> listOfRecipes){
         //ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MrecipeNames);
         //listView.setAdapter(listAdapter);
         //listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
@@ -184,6 +176,7 @@ public class MainFragment extends Fragment {
         //RecyclerView
         //listView.setVisibility(View.GONE);
 
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
         MainFragmentAdapter recipeAdapter = new MainFragmentAdapter(getContext(), MrecipeNames);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -197,9 +190,6 @@ public class MainFragment extends Fragment {
                 Log.i("Count", String.valueOf(MrecipeNames.size()));
             }
         });
-
-
-
     }
 
 

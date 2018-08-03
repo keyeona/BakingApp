@@ -53,11 +53,9 @@ public class ListViewWidgetService extends RemoteViewsService {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.list_item_widget);
 
             views.setTextViewText(R.id.titleTextView, dataList.get(position).title);
-            //views.setTextViewText(R.id.subTitleTextView, dataList.get(position).subTitle);
 
             Intent fillInIntent = new Intent();
             fillInIntent.putExtra("ItemTitle",dataList.get(position).title);
-            //fillInIntent.putExtra("ItemSubTitle",dataList.get(position).subTitle);
             views.setOnClickFillInIntent(R.id.parentView, fillInIntent);
             return views;
         }
@@ -83,5 +81,7 @@ public class ListViewWidgetService extends RemoteViewsService {
             return true;
         }
     }
+
+
 }
 
